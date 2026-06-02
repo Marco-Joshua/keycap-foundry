@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Silver Keycap — Gallery</title>
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; padding: 0; height: 100%; background: #0a0c10; color: #e6e6e6;
+               font-family: -apple-system, BlinkMacSystemFont, "SF Pro", "Pretendard", sans-serif; overflow: hidden; }
+  #viewer { width: 100vw; height: 100vh; display: block; }
+
+  #topbar {
+    position: fixed; top: 0; left: 0; right: 0;
+    display: flex; align-items: center; gap: 8px;
+    padding: 14px 20px;
+    background: linear-gradient(to bottom, rgba(10,12,16,0.95), rgba(10,12,16,0));
+    z-index: 10;
+  }
+  #title { font-size: 14px; font-weight: 600; color: #ffffff; margin-right: 18px; letter-spacing: 0.02em; }
+  .tab {
+    padding: 6px 14px;
+    font-size: 12px;
+    color: #8a93a3;
+    background: rgba(30, 34, 42, 0.7);
+    border: 1px solid #2a2e36;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    backdrop-filter: blur(8px);
+  }
+  .tab:hover { color: #e6e6e6; border-color: #4a5060; }
+  .tab.active { background: #e6e6e6; color: #0a0c10; border-color: #e6e6e6; font-weight: 600; }
+
+  #views {
+    position: fixed; bottom: 56px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 6px;
+    background: rgba(20, 22, 28, 0.85);
+    border: 1px solid #2a2e36;
+    border-radius: 999px;
+    padding: 6px;
+    backdrop-filter: blur(8px);
+    z-index: 10;
+  }
+  .vp {
+    padding: 6px 12px;
+    font-size: 12px;
+    color: #8a93a3;
+    background: transparent;
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.12s ease;
+  }
+  .vp:hover { color: #e6e6e6; background: rgba(255,255,255,0.05); }
+  .vp.active { color: #0a0c10; background: #e6e6e6; font-weight: 600; }
+
+  #stats {
+    position: fixed; right: 16px; top: 70px;
+    width: 260px;
+    background: rgba(20, 22, 28, 0.9);
+    border: 1px solid #2a2e36;
+    border-radius: 10px;
+    padding: 16px 18px;
+    font-size: 12px;
+    line-height: 1.7;
+    backdrop-filter: blur(12px);
+    z-index: 10;
+  }
+  #stats h2 { margin: 0 0 12px 0; font-size: 14px; color: #ffffff; font-weight: 600; }
+  #stats .row { display: flex; justify-content: space-between; }
+  #stats .k { color: #8a93a3; }
+  #stats .v { color: #e6e6e6; font-variant-numeric: tabular-nums; }
+  #stats .v.silver { color: #d8dde6; font-weight: 600; }
+  #stats .meta { margin-top: 12px; padding-top: 12px; border-top: 1px solid #2a2e36; color: #6a7080; font-size: 11px; line-height: 1.5; }
+  #stats .badge { display: inline-block; padding: 2px 8px; background: #1a3b25; color: #6bcf7f; border-radius: 4px; font-size: 10px; margin-top: 6px; }
+
+  #footer {
+    position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%);
+    font-size: 11px; color: #4a5060;
+    background: rgba(20, 22, 28, 0.7);
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid #2a2e36;
+    backdrop-filter: blur(8px);
+    z-index: 10;
+  }
+</style>
+</head>
+<body>
+<canvas id="viewer"></canvas>
+
+<div id="topbar">
+  <div id="title">Silver Keycap Gallery</div>
+  <div class="tab active" data-group="esc">ESC 키캡 (production)</div>
+  <div class="tab" data-group="flat">평평한 윗면</div>
+  <div class="tab" data-group="section">단면 (내부 구조)</div>
+</div>
+
+<div id="stats">
+  <h2 id="stats-title">—</h2>
+  <div class="row"><span class="k">크기</span><span class="v" id="s-size">—</span></div>
+  <div class="row"><span class="k">부피</span><span class="v" id="s-vol">—</span></div>
+  <div class="row"><span class="k">실버 무게</span><span class="v silver" id="s-wt">—</span></div>
+  <div class="row"><span class="k">예상 재료비</span><span class="v" id="s-cost">—</span></div>
+  <div id="s-badge"></div>
+  <div class="meta">키캡 클릭 시 상세 정보 표시. 좌클릭 드래그: 회전 · 휠: 줌</div>
+</div>
+
+<div id="views">
+  <button class="vp active" data-v="iso">자유</button>
+  <button class="vp" data-v="front">정면</button>
+  <button class="vp" data-v="top">위에서 ↓</button>
+  <button class="vp" data-v="bottom">아래에서 ↑</button>
+  <button class="vp" data-v="side">옆</button>
+  <button class="vp" data-v="back">뒤</button>
+</div>
+
+<div id="footer">OpenSCAD → STL → Three.js · 모든 모델은 lost-wax 캐스팅 가능한 manifold mesh</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { STLLoader } from 'three/addons/loaders/STLLoader.js';
+
+const SILVER_KRW_PER_G = 1500;
+
+const canvas = document.getElementById('viewer');
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0a0c10);
+// fog pushed back so wide rows (sizes/spacebar) don't fade
+scene.fog = new THREE.Fog(0x0a0c10, 280, 600);
+
+const camera = new THREE.PerspectiveCamera(32, window.innerWidth / window.innerHeight, 0.5, 2000);
+camera.position.set(0, 60, 100);
+
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.25;
+
+// Lighting — broader coverage for wide rows
+scene.add(new THREE.AmbientLight(0xffffff, 0.32));
+scene.add(new THREE.HemisphereLight(0xc8d4ee, 0x1a1d24, 0.45));
+const key = new THREE.DirectionalLight(0xffffff, 1.8);
+key.position.set(60, 120, 80);
+key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+key.shadow.camera.left = -200; key.shadow.camera.right = 200;
+key.shadow.camera.top = 60; key.shadow.camera.bottom = -60;
+key.shadow.camera.near = 10; key.shadow.camera.far = 400;
+scene.add(key);
+const fill = new THREE.DirectionalLight(0x9eb4ff, 0.7);
+fill.position.set(-80, 50, -40); scene.add(fill);
+const rim = new THREE.DirectionalLight(0xffd8a8, 0.55);
+rim.position.set(0, 50, -100); scene.add(rim);
+// extra under-light so bottom-view is readable when looking up at the open cavity
+const under = new THREE.DirectionalLight(0xb0c4d8, 0.5);
+under.position.set(0, -60, 30); scene.add(under);
+
+// PMREM environment
+const pmremGenerator = new THREE.PMREMGenerator(renderer);
+const envScene = new THREE.Scene();
+const envMat = new THREE.ShaderMaterial({
+  side: THREE.BackSide,
+  vertexShader: 'varying vec3 vN; void main(){ vN = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);}',
+  fragmentShader: 'varying vec3 vN; void main(){ float t = vN.y*0.5+0.5; vec3 top=vec3(0.62,0.68,0.82); vec3 mid=vec3(0.20,0.22,0.28); vec3 bot=vec3(0.04,0.04,0.06); vec3 c=mix(bot,mid,smoothstep(0.0,0.5,t)); c=mix(c,top,smoothstep(0.5,1.0,t)); gl_FragColor=vec4(c,1.0);}'
+});
+envScene.add(new THREE.Mesh(new THREE.SphereGeometry(60, 32, 32), envMat));
+scene.environment = pmremGenerator.fromScene(envScene).texture;
+
+// Ground plane (subtle)
+const ground = new THREE.Mesh(
+  new THREE.CircleGeometry(180, 64),
+  new THREE.MeshStandardMaterial({ color: 0x10131a, roughness: 0.92, metalness: 0.0 })
+);
+ground.rotation.x = -Math.PI / 2;
+ground.position.y = -0.05;
+ground.receiveShadow = true;
+scene.add(ground);
+
+// Subtle grid
+const grid = new THREE.GridHelper(160, 32, 0x222630, 0x161920);
+grid.position.y = 0.001; scene.add(grid);
+
+// Silver material — used for non-section groups (aesthetic preview)
+const silverMaterial = new THREE.MeshPhysicalMaterial({
+  color: 0xeaecef, metalness: 1.0, roughness: 0.17,
+  clearcoat: 0.12, clearcoatRoughness: 0.45,
+  envMapIntensity: 1.15,
+});
+
+// Matte engineering material — used for section view so geometry/depth is readable
+const matteMaterial = new THREE.MeshStandardMaterial({
+  color: 0xc8ccd4,
+  metalness: 0.0,
+  roughness: 0.85,
+  envMapIntensity: 0.3,
+});
+
+// Highlight material for hovered keycap (silver-based)
+const highlightMaterial = silverMaterial.clone();
+highlightMaterial.color = new THREE.Color(0xfff4c2);
+highlightMaterial.emissive = new THREE.Color(0x221a00);
+
+// Matte highlight for section view
+const matteHighlight = matteMaterial.clone();
+matteHighlight.color = new THREE.Color(0xffe9a0);
+matteHighlight.emissive = new THREE.Color(0x2a1f00);
+
+// Edge-line material — shared
+const edgeMaterial = new THREE.LineBasicMaterial({
+  color: 0x0a0c10, transparent: true, opacity: 0.7,
+});
+
+// Strong front light enabled only for section view
+const sectionFrontLight = new THREE.DirectionalLight(0xffffff, 1.2);
+sectionFrontLight.position.set(0, 20, 100);
+sectionFrontLight.visible = false;
+scene.add(sectionFrontLight);
+
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.target.set(0, 4, 0);
+controls.minPolarAngle = 0;
+controls.maxPolarAngle = Math.PI;  // allow full sphere — can look from below
+
+const loader = new STLLoader();
+const stlCache = new Map();
+let keycapMeshes = [];   // {mesh, sprite, data}
+
+async function loadGeometry(file) {
+  if (stlCache.has(file)) return stlCache.get(file).clone();
+  return new Promise((resolve, reject) => {
+    loader.load(file, geo => {
+      geo.computeVertexNormals();
+      geo.rotateX(-Math.PI / 2);
+      geo.computeBoundingBox();
+      const bb = geo.boundingBox;
+      geo.translate(-(bb.min.x + bb.max.x)/2, -bb.min.y, -(bb.min.z + bb.max.z)/2);
+      stlCache.set(file, geo);
+      resolve(geo.clone());
+    }, undefined, reject);
+  });
+}
+
+function makeLabel(text) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1024; canvas.height = 256;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 80px -apple-system, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.shadowColor = 'rgba(0,0,0,0.6)';
+  ctx.shadowBlur = 8;
+  ctx.fillText(text, 512, 128);
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.anisotropy = 8;
+  const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false });
+  const sprite = new THREE.Sprite(mat);
+  sprite.scale.set(20, 5, 1);
+  return sprite;
+}
+
+function clearGroup() {
+  keycapMeshes.forEach(k => {
+    scene.remove(k.mesh);
+    scene.remove(k.sprite);
+    if (k.edges) scene.remove(k.edges);
+    k.mesh.geometry.dispose();
+  });
+  keycapMeshes = [];
+}
+
+async function showGroup(group) {
+  clearGroup();
+  const items = manifest.filter(m => m.group === group).sort((a,b) => a.order - b.order);
+  if (items.length === 0) return;
+
+  const isSection = group === 'section' || group === 'esc';  // esc has cutaway too
+  // Section view: scale up 2× so wall thicknesses are clearly visible at default zoom.
+  // Also use wider spacing and matte material with edge overlay.
+  const scale = isSection ? 2.0 : 1.0;
+  const spacing = isSection ? 14 : 8;
+  const mat = isSection ? matteMaterial : silverMaterial;
+
+  const widths = items.map(m => m.size_mm[0] * scale);
+  const total = widths.reduce((a,b) => a + b, 0) + (items.length - 1) * spacing;
+  let cursor = -total / 2;
+
+  for (const data of items) {
+    const halfW = (data.size_mm[0] * scale) / 2;
+    cursor += halfW;
+    const geo = await loadGeometry(data.file);
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.set(cursor, 0, 0);
+    mesh.scale.setScalar(scale);
+    mesh.castShadow = true; mesh.receiveShadow = true;
+    mesh.userData = data;
+    scene.add(mesh);
+
+    // Edge overlay — outlines all sharp geometric edges (≥18°)
+    const edgeGeo = new THREE.EdgesGeometry(geo, 18);
+    const edges = new THREE.LineSegments(edgeGeo, edgeMaterial);
+    edges.position.copy(mesh.position);
+    edges.scale.setScalar(scale);
+    scene.add(edges);
+
+    const sprite = makeLabel(data.label);
+    sprite.position.set(cursor, -3, isSection ? data.size_mm[1] * scale * 0.6 + 4 : 6);
+    sprite.scale.set(isSection ? 28 : 20, isSection ? 7 : 5, 1);
+    scene.add(sprite);
+    keycapMeshes.push({ mesh, sprite, edges, data });
+    cursor += halfW + spacing;
+  }
+
+  // Camera framing: section uses near-orthographic head-on view of the cut face.
+  const padding = 40;
+  const dist = Math.max(60, total * (isSection ? 0.7 : 0.75) + padding);
+  if (isSection) {
+    camera.position.set(0, 6, dist);
+    controls.target.set(0, 8, 0);
+    sectionFrontLight.visible = true;
+  } else {
+    camera.position.set(0, dist * 0.5, dist);
+    controls.target.set(0, 4, 0);
+    sectionFrontLight.visible = false;
+  }
+  // ground plane visibility: hide when content extends wide (so under-view is unobstructed)
+  ground.visible = !isSection;
+  // reset view preset to free
+  document.querySelectorAll('.vp').forEach(b => b.classList.toggle('active', b.dataset.v === 'iso'));
+
+  showDetails(items[0]);
+}
+
+function showDetails(data) {
+  const isSection = data.group === 'section';
+  const wtFull = isSection ? data.weight_g * 2 : data.weight_g;
+  const volFull = isSection ? data.volume_cm3 * 2 : data.volume_cm3;
+
+  document.getElementById('stats-title').textContent = data.label + (isSection ? ' (단면)' : '');
+  document.getElementById('s-size').textContent =
+    `${data.size_mm[0]} × ${data.size_mm[1]} × ${data.size_mm[2]} mm`;
+  document.getElementById('s-vol').textContent = isSection
+    ? `${data.volume_cm3} cm³  (전체: ${volFull.toFixed(3)} cm³)`
+    : `${data.volume_cm3} cm³`;
+  document.getElementById('s-wt').textContent = isSection
+    ? `${data.weight_g} g × 2 = ${wtFull.toFixed(2)} g (전체)`
+    : `${data.weight_g} g`;
+  const cost = wtFull * SILVER_KRW_PER_G;
+  document.getElementById('s-cost').textContent =
+    `≈ ₩${cost.toLocaleString('ko-KR', {maximumFractionDigits: 0})}` + (isSection ? ' (전체 키캡 기준)' : '');
+  const badge = document.getElementById('s-badge');
+  badge.innerHTML = data.watertight
+    ? '<span class="badge">✓ Watertight · 캐스팅 가능</span>'
+    : '<span class="badge" style="background:#3b1a1a;color:#ff8888">✗ 메시 오류</span>';
+}
+
+// Raycaster for click selection
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+let hovered = null;
+canvas.addEventListener('pointermove', (e) => {
+  pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
+  pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(pointer, camera);
+  const hits = raycaster.intersectObjects(keycapMeshes.map(k => k.mesh));
+  const newHover = hits.length > 0 ? hits[0].object : null;
+  if (newHover !== hovered) {
+    const isSection = keycapMeshes[0]?.data?.group === 'section';
+    const baseMat = isSection ? matteMaterial : silverMaterial;
+    const hlMat = isSection ? matteHighlight : highlightMaterial;
+    if (hovered) hovered.material = baseMat;
+    if (newHover) {
+      newHover.material = hlMat;
+      showDetails(newHover.userData);
+    }
+    hovered = newHover;
+    canvas.style.cursor = newHover ? 'pointer' : 'default';
+  }
+});
+
+// View preset buttons
+function applyView(v) {
+  const target = controls.target;
+  const dist = camera.position.distanceTo(target);
+  const positions = {
+    iso:    [dist * 0.55, dist * 0.45, dist * 0.7],
+    front:  [0, dist * 0.08, dist],
+    back:   [0, dist * 0.08, -dist],
+    top:    [0.001, dist, 0.001],
+    bottom: [0.001, -dist * 0.85, 0.001],
+    side:   [dist, dist * 0.08, 0],
+  };
+  const p = positions[v] || positions.iso;
+  camera.position.set(target.x + p[0], target.y + p[1], target.z + p[2]);
+  controls.update();
+  document.querySelectorAll('.vp').forEach(b => b.classList.toggle('active', b.dataset.v === v));
+}
+document.querySelectorAll('.vp').forEach(b => {
+  b.addEventListener('click', () => applyView(b.dataset.v));
+});
+
+// Tab handling
+let manifest = [];
+async function init() {
+  const r = await fetch('manifest.json');
+  manifest = await r.json();
+  document.querySelectorAll('.tab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      showGroup(t.dataset.group);
+    });
+  });
+  await showGroup('esc');
+}
+init();
+
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene, camera);
+}
+animate();
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+</body>
+</html>

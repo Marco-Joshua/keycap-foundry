@@ -1,0 +1,142 @@
+[
+  {
+    "file": "production/ESC_1u_flat_hollow_1.0mm_design.stl",
+    "group": "esc",
+    "label": "ESC 1.0mm (design)",
+    "order": 0,
+    "size_mm": [
+      18.1,
+      18.1,
+      9.4
+    ],
+    "volume_cm3": 0.754,
+    "weight_g": 7.91,
+    "watertight": true
+  },
+  {
+    "file": "production/ESC_1u_flat_hollow_1.0mm_cast.stl",
+    "group": "esc",
+    "label": "ESC 1.0mm (cast 1.8%↑)",
+    "order": 1,
+    "size_mm": [
+      18.43,
+      18.43,
+      9.57
+    ],
+    "volume_cm3": 0.795,
+    "weight_g": 8.34,
+    "watertight": true
+  },
+  {
+    "file": "production/ESC_1u_cutaway.stl",
+    "group": "esc",
+    "label": "ESC 1.0mm 단면",
+    "order": 2,
+    "size_mm": [
+      18.1,
+      9.05,
+      9.4
+    ],
+    "volume_cm3": 0.377,
+    "weight_g": 3.95,
+    "watertight": true
+  },
+  {
+    "file": "production/ESC_1u_flat_hollow_0.8mm_design.stl",
+    "group": "esc",
+    "label": "ESC 0.8mm (design)",
+    "order": 3,
+    "size_mm": [
+      18.1,
+      18.1,
+      9.4
+    ],
+    "volume_cm3": 0.629,
+    "weight_g": 6.6,
+    "watertight": true
+  },
+  {
+    "file": "production/ESC_1u_flat_hollow_0.8mm_cast.stl",
+    "group": "esc",
+    "label": "ESC 0.8mm (cast)",
+    "order": 4,
+    "size_mm": [
+      18.43,
+      18.43,
+      9.57
+    ],
+    "volume_cm3": 0.663,
+    "weight_g": 6.96,
+    "watertight": true
+  },
+  {
+    "file": "production/ESC_1u_cutaway_0.8mm.stl",
+    "group": "esc",
+    "label": "ESC 0.8mm 단면",
+    "order": 5,
+    "size_mm": [
+      18.1,
+      9.05,
+      9.4
+    ],
+    "volume_cm3": 0.314,
+    "weight_g": 3.3,
+    "watertight": true
+  },
+  {
+    "file": "out/flat_1u_hollow.stl",
+    "group": "flat",
+    "label": "Hollow 1.0mm wall",
+    "order": 0,
+    "size_mm": [
+      18.1,
+      18.1,
+      7.6
+    ],
+    "volume_cm3": 0.654,
+    "weight_g": 6.86,
+    "watertight": true
+  },
+  {
+    "file": "out/flat_1u_hollow_thin.stl",
+    "group": "flat",
+    "label": "Hollow 0.8mm wall",
+    "order": 1,
+    "size_mm": [
+      18.1,
+      18.1,
+      7.6
+    ],
+    "volume_cm3": 0.548,
+    "weight_g": 5.75,
+    "watertight": true
+  },
+  {
+    "file": "out/flat_cutaway_hollow.stl",
+    "group": "section",
+    "label": "Hollow 1.0mm 단면",
+    "order": 0,
+    "size_mm": [
+      18.1,
+      9.05,
+      7.6
+    ],
+    "volume_cm3": 0.327,
+    "weight_g": 3.43,
+    "watertight": true
+  },
+  {
+    "file": "out/flat_cutaway_hollow_thin.stl",
+    "group": "section",
+    "label": "Hollow 0.8mm 단면",
+    "order": 1,
+    "size_mm": [
+      18.1,
+      9.05,
+      7.6
+    ],
+    "volume_cm3": 0.274,
+    "weight_g": 2.88,
+    "watertight": true
+  }
+]

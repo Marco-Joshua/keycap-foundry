@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Silver Keycap Builder</title>
+<style>
+  html, body { margin: 0; padding: 0; min-height: 100vh; background: #0a0c10; color: #e6e6e6;
+               font-family: -apple-system, BlinkMacSystemFont, "SF Pro", "Pretendard", sans-serif; }
+  .wrap { max-width: 820px; margin: 0 auto; padding: 80px 32px; }
+  h1 { font-size: 32px; font-weight: 700; margin: 0 0 8px 0; letter-spacing: -0.02em; }
+  .sub { color: #8a93a3; font-size: 15px; margin: 0 0 48px 0; line-height: 1.6; }
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .card {
+    background: linear-gradient(135deg, #1a1d24, #14171c);
+    border: 1px solid #2a2e36;
+    border-radius: 14px;
+    padding: 28px 26px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s ease;
+    display: block;
+  }
+  .card:hover { border-color: #4a5060; transform: translateY(-2px); }
+  .card h2 { margin: 0 0 8px 0; font-size: 18px; font-weight: 600; color: #ffffff; }
+  .card p { margin: 0; color: #8a93a3; font-size: 13px; line-height: 1.6; }
+  .arrow { float: right; color: #4a5060; }
+  .footer { margin-top: 64px; padding-top: 24px; border-top: 1px solid #2a2e36; color: #6a7080; font-size: 12px; line-height: 1.8; }
+  code { background: #1a1d24; padding: 2px 6px; border-radius: 4px; font-size: 12px; color: #b8c0d0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Silver Keycap Builder</h1>
+  <p class="sub">파라메트릭 OpenSCAD → STL → Three.js로 렌더링되는 키캡 라이브러리.<br>
+     모든 모델은 lost-wax 캐스팅 가능한 manifold mesh로 검증됨.</p>
+
+  <div class="cards">
+    <a class="card" href="gallery.html">
+      <h2>3D Gallery <span class="arrow">→</span></h2>
+      <p>ESC 키캡 production / 평평한 윗면 / 단면 비교.<br>인터랙티브 3D 뷰어 + 다각도 카메라.</p>
+    </a>
+    <a class="card" href="production/spec_sheet.html">
+      <h2>발주 명세서 <span class="arrow">→</span></h2>
+      <p>치수 도면 + 캐스팅 메모. 종로 주물업체 전달용 (브라우저 인쇄로 PDF 출력).</p>
+    </a>
+    <a class="card" href="production/ESC_rotation.gif">
+      <h2>360° 회전 GIF <span class="arrow">→</span></h2>
+      <p>카톡으로 캐스터에게 미리보기 전송용. 3초 루프.</p>
+    </a>
+    <a class="card" href="production/SLICER_CHECK.md">
+      <h2>슬라이서 가이드 <span class="arrow">→</span></h2>
+      <p>PLA / 캐스터블 레진 출력 전 점검 항목.</p>
+    </a>
+  </div>
+
+  <div class="footer">
+    <strong>Re-build with parameters</strong><br>
+    <code>openscad -D 'profile="sa"' -D 'row=1' -D 'legend="ESC"' -o out/custom.stl keycap.scad</code><br>
+    <code>python3 build_manifest.py</code><br>
+    <br>
+    Files: <code>keycap.scad</code>(library) · <code>out/*.stl</code>(meshes) · <code>manifest.json</code>(metadata)
+  </div>
+</div>
+</body>
+</html>
